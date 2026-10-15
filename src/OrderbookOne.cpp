@@ -5,8 +5,91 @@
 #include <vector>
 
 
-void OrderbookOne::add_order(uint32_t id, Side side, uint16_t price, uint8_t qty){};
-bool OrderbookOne::cancel_order(uint32_t id){};
-BBO OrderbookOne::get_bbo() const{};
-std::vector<Level> OrderbookOne::get_bids(int depth) const{};
-std::vector<Level> OrderbookOne::get_asks(int depth) const{};
+void OrderbookOne::add_order(uint32_t id, Side side, uint16_t price, uint8_t qty){
+    if(side==Side::Buy){
+        auto it = bids.find(price);
+        if(it==bids.end()){
+            auto result = bids.insert({price,qty});
+            id_map.insert({id,{side,result.first,qty}});
+        }else{
+            it->second+=qty;
+            id_map.insert({id,{side,it,qty}});
+        }
+
+    }else{
+        auto it = asks.find(price);
+        if(it==asks.end()){
+            auto result = asks.insert({price,qty});
+            id_map.insert({id,{side,result.first,qty}});
+        }else{
+            it->second+=qty;
+            id_map.insert({id,{side,it,qty}});
+        }
+    }
+};
+
+bool OrderbookOne::cancel_order(uint32_t id){
+    auto id_map_it = id_map.find(id);
+
+    if(id_map_it!=id_map.end()){
+
+        auto mp_it = id_map_it->second.it;
+        auto quantity = id_map_it->second.quantity;
+        auto side = id_map_it->second.side;
+        mp_it->second-=quantity;
+        if(mp_it->second==0){
+            if(side==Side::Buy){
+                bids.erase(mp_it);
+            }else{
+                asks.erase(mp_it);
+            }
+        }
+
+        id_map.erase(id_map_it);
+        return true;
+    }
+    return false;
+};
+
+BBO OrderbookOne::get_bbo() const{
+    auto bid_it = bids.begin();
+    auto asks_it = asks.begin();
+    bool has_bid = bid_it!=bids.end();
+    bool has_ask = asks_it!=asks.end();
+
+    BBO temp = {
+        has_bid,
+        (has_bid)?(bid_it->first):(static_cast<u16>(0)),
+        (has_bid)?(bid_it->second):(static_cast<u32>(0)),
+
+        has_ask,
+        (has_ask)?(asks_it->first):(static_cast<u16>(0)),
+        (has_ask)?(asks_it->second):(static_cast<u8>(0)),
+
+    };
+    return temp;
+};
+
+std::vector<Level> OrderbookOne::get_bids(int depth) const{
+    int count = std::min(bids.size(),static_cast<size_t>(depth));
+    std::vector<Level> temp(count);
+    auto it = bids.begin();
+    for(int i =0;i<count;i++){
+        temp[i] = {it->first, it->second};
+        it++;
+    }
+
+    return temp;
+};
+
+std::vector<Level> OrderbookOne::get_asks(int depth) const{
+    int count = std::min(asks.size(),static_cast<size_t>(depth));
+    std::vector<Level> temp(count);
+    auto it = asks.begin();
+    for(int i =0;i<count;i++){
+        temp[i] = {it->first, it->second};
+        it++;
+    }
+
+    return temp;
+};
