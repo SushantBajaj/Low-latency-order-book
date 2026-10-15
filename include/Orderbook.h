@@ -1,0 +1,17 @@
+#pragma once
+
+#include"../common/OrderbookTypes.h"
+
+#include <cstdint>
+#include <vector>
+
+
+
+class IOrderBook {
+    public:
+    virtual void add_order(uint64_t id, Side side, uint16_t price, uint8_t qty) = 0;
+    virtual bool cancel_order(uint64_t id) = 0;
+    virtual BBO get_bbo() const = 0;
+    virtual std::vector<Level> get_bids(int depth = 10) const =0;
+    virtual std::vector<Level> get_asks(int depth = 10) const =0;
+};
