@@ -6,10 +6,10 @@
 #include <cstdint>
 #include <vector>
 
-class OrderbookThree : public IOrderBook{
+class OrderbookThree : public IOrderbook{
     public:
-    void add_order(uint64_t id, Side side, uint16_t price, uint8_t qty) override;
-    bool cancel_order(uint64_t id) override;
+    void add_order(uint32_t id, Side side, uint16_t price, uint8_t qty) override;
+    bool cancel_order(uint32_t id) override;
     BBO get_bbo() const override;
     std::vector<Level> get_bids(int depth = 10) const override;
     std::vector<Level> get_asks(int depth = 10) const override;
