@@ -1,0 +1,18 @@
+# started on Fri Oct 16 11:42:42 2026
+
+407.90,msec,task-clock:u,407901103,100.00,,
+<not counted>,,cpu_atom/cycles/u,0,0.00,,
+1434595224,,cpu_core/cycles/u,407901103,100.00,,
+<not counted>,,cpu_atom/instructions/u,0,0.00,,
+2867068037,,cpu_core/instructions/u,407901103,100.00,,
+<not counted>,,cpu_atom/branches/u,0,0.00,,
+412740294,,cpu_core/branches/u,407901103,100.00,,
+<not counted>,,cpu_atom/branch-misses/u,0,0.00,,
+1052453,,cpu_core/branch-misses/u,407901103,100.00,,
+<not counted>,,cpu_atom/cache-misses/u,0,0.00,,
+1807436,,cpu_core/cache-misses/u,407901103,100.00,,
+<not supported>,,cpu_atom/L1-dcache-load-misses/u,0,100.00,,
+6741132,,cpu_core/L1-dcache-load-misses/u,407901103,100.00,,
+<not counted>,,cpu_atom/dTLB-load-misses/u,0,0.00,,
+690456,,cpu_core/dTLB-load-misses/u,407901103,100.00,,
+27543,,page-faults:u,407901103,100.00,,
