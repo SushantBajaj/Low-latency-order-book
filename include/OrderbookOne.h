@@ -35,7 +35,7 @@ class OrderbookOne : public IOrderbook{
     OrderbookOne();
     void add_order(uint32_t id, Side side, uint16_t price, uint8_t qty) override;
     bool cancel_order(uint32_t id) override;
-    BBO get_bbo() const override;
-    std::vector<Level> get_bids(int depth = 10) const override;
-    std::vector<Level> get_asks(int depth = 10) const override;
+    BBO get_bbo() override;
+    std::vector<Level> get_bids(int depth = 10)  override;
+    std::vector<Level> get_asks(int depth = 10)  override;
 };

@@ -51,3 +51,6 @@ then started adding some branchless code-
 4.66%->4.51% () - used map pointer to sleect map in add_order on impl1
 
 using monotonic_buffer for the ds of implA really helped, times improved by a lot, and the best thing that happened was that cache miss reduced by 36%, this prolly happened because with mono allots nodes for the map, it gives them in order while the default allocator finds free slots and fill em, so mono improved our cache locality, didnt measure memeory, but mono will ofc take more
+
+
+had to remove const from get_bbo/get_bids/get_asks, as we need to modify ds in impl2

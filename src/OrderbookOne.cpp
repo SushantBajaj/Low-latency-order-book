@@ -48,7 +48,7 @@ bool OrderbookOne::cancel_order(uint32_t id){
     return false;
 };
 
-BBO OrderbookOne::get_bbo() const{
+BBO OrderbookOne::get_bbo(){
     bool has_ask = asks.size()!=0;
     bool has_bid = bids.size()!=0;
     auto bid_it = prev(bids.end());
@@ -67,7 +67,7 @@ BBO OrderbookOne::get_bbo() const{
     return temp;
 };
 
-std::vector<Level> OrderbookOne::get_bids(int depth) const{
+std::vector<Level> OrderbookOne::get_bids(int depth) {
     int count = std::min(bids.size(),static_cast<size_t>(depth));
     std::vector<Level> temp(count);
     auto it = bids.rbegin();
@@ -79,7 +79,7 @@ std::vector<Level> OrderbookOne::get_bids(int depth) const{
     return temp;
 };
 
-std::vector<Level> OrderbookOne::get_asks(int depth) const{
+std::vector<Level> OrderbookOne::get_asks(int depth) {
     int count = std::min(asks.size(),static_cast<size_t>(depth));
     std::vector<Level> temp(count);
     auto it = asks.begin();
