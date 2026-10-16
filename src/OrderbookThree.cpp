@@ -12,7 +12,7 @@ using u8 = std::uint8_t;
 
 
 size_t arr_size = (5000/64) + 1;
-size_t bid_offset = (9999-(arr_size*64)) +1;
+size_t bid_offset = (5000);
 size_t ask_offset = (10001);
 size_t quantity_arr_offset = 5000;
 
@@ -24,7 +24,54 @@ OrderbookThree::OrderbookThree(){
 
 }
 
-u8 last_set_bit(u64 qword){
+u8 OrderbookThree::last_set_bit(u64 qword){
+    u8 curr = {};
+    u32 low_dword = static_cast<u32>(qword);
+    u32 high_dword = static_cast<u32>(qword>>32);
+    u32 dword = {};
+
+    if(low_dword!=0){
+        curr+=32;
+        dword = low_dword;
+    }else{
+        dword = high_dword;
+    }
+
+    u16 low_word = static_cast<u16>(dword);
+    u16 high_word = static_cast<u16>(dword>>16);
+    u16 word = {};
+
+    if(low_word!=0){
+        curr+=16;
+        word = low_word;
+    }else{
+        word = high_word;
+    }
+
+    u8 low_byte = static_cast<u8>(word);
+    u8 high_byte = static_cast<u8>(word>>8);
+    u8 byte = {};
+
+    if(low_byte!=0){
+        curr+=8;
+        byte = low_byte;
+    }else{
+        byte = high_byte;
+    }
+
+    for(int i =7;i>=0;i--){
+        if(byte & (u8{1}<<(7-i))){
+            curr+=i;
+            break;
+        }
+    }
+    return curr;
+
+
+}
+
+
+u8 OrderbookThree::first_set_bit(u64 qword){
     u8 curr = {};
     u32 low_dword = static_cast<u32>(qword);
     u32 high_dword = static_cast<u32>(qword>>32);
@@ -32,8 +79,8 @@ u8 last_set_bit(u64 qword){
 
     if(high_dword!=0){
         dword = high_dword;
-        curr+=32;
     }else{
+        curr+=32;
         dword = low_dword;
     }
 
@@ -43,8 +90,8 @@ u8 last_set_bit(u64 qword){
 
     if(high_word!=0){
         word = high_word;
-        curr+=16;
     }else{
+        curr+=16;
         word = low_word;
     }
 
@@ -54,13 +101,13 @@ u8 last_set_bit(u64 qword){
 
     if(high_byte!=0){
         byte = high_byte;
-        curr+=8;
     }else{
+        curr+=8;
         byte = low_byte;
     }
 
-    for(int i =7;i>=0;i--){
-        if(byte & (u8{1}<<i)){
+    for(int i =0;i<8;i++){
+        if(byte & (u8{1}<<(7-i))){
             curr+=i;
             break;
         }
@@ -139,7 +186,7 @@ BBO OrderbookThree::get_bbo(){
     temp.has_bid = has_bid;
     if(has_bid){
         u8 bit_position = last_set_bit(bids[bid_qword_idx]);
-        u16 price = ((bid_qword_idx*64)+(63-bit_position))+bid_offset;
+        u16 price = ((bid_qword_idx*64)+(bit_position))+bid_offset;
         temp.bid_price = price;
         temp.bid_qty = quantities[price-quantity_arr_offset];
 
@@ -160,10 +207,10 @@ BBO OrderbookThree::get_bbo(){
     temp.has_ask = has_ask;
 
     if(has_ask){
-        u8 bit_position = last_set_bit(asks[ask_qword_idx]);
-        u16 price = ((ask_qword_idx*64)+ (63-bit_position)) + ask_offset;
+        u8 bit_position = first_set_bit(asks[ask_qword_idx]);
+        u16 price = ((ask_qword_idx*64)+ (bit_position)) + ask_offset;
         temp.ask_price = price;
-        temp.ask_qty = quantities[price+quantity_arr_offset];
+        temp.ask_qty = quantities[price-quantity_arr_offset];
     }else{
         temp.ask_price = 0;
         temp.ask_qty = 0;
@@ -171,5 +218,45 @@ BBO OrderbookThree::get_bbo(){
 
     return temp;
 };
-std::vector<Level> OrderbookThree::get_bids(int depth) {};
-std::vector<Level> OrderbookThree::get_asks(int depth) {};
+std::vector<Level> OrderbookThree::get_bids(int depth) {
+    std::vector<Level> temp;
+    temp.reserve(depth);
+
+    int idx = (arr_size-1);
+    while(idx >= 0 && temp.size() < depth){
+        u64 word = bids[idx];
+        if(word == 0){
+            idx--;
+            continue;
+        }
+        for(int i = 63;(i>=0)&& (temp.size()< depth);i--){
+            if(word & (u64{1} << (63 - i))){
+                u16 price = idx*64 + i + bid_offset;
+                temp.push_back({price, quantities[price - quantity_arr_offset]});
+            }
+        }
+        idx--;
+    }
+    return temp;
+}
+std::vector<Level> OrderbookThree::get_asks(int depth) {
+    std::vector<Level> temp;
+    temp.reserve(depth);
+
+    int idx = 0;
+    while(idx < arr_size && temp.size() < depth){
+        u64 word = asks[idx];
+        if(word == 0){
+            idx++;
+            continue;
+        }
+        for(int i = 0; (i < 64) && (temp.size() < depth); i++){
+            if(word & (u64{1} << (63 - i))){
+                u16 price = idx*64 + i + ask_offset;
+                temp.push_back({price, quantities[price - quantity_arr_offset]});
+            }
+        }
+        idx++;
+    }
+    return temp;
+}

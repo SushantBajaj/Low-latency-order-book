@@ -3,7 +3,7 @@
 #include "../include/Orderbook.h"
 #include "../include/OrderbookOne.h"
 #include "../include/OrderbookTwo.h"
-// #include "../include/OrderbookThree.h"
+#include "../include/OrderbookThree.h"
 
 #include <memory>
 #include <stdexcept>
@@ -24,7 +24,7 @@ int main(){
 
     std::filesystem::create_directories("./output");
 
-    for(char impl : {'A', 'B'}){
+    for(char impl : {'A', 'B', 'C'}){
 
         std::unique_ptr<IOrderbook> book;
         if(impl=='A'){
@@ -32,7 +32,7 @@ int main(){
         }else if(impl=='B'){
             book = std::make_unique<OrderbookTwo>();
         }else if(impl=='C'){
-            // book = std::make_unique<OrderbookThree>();
+            book = std::make_unique<OrderbookThree>();
         }else{
             throw std::invalid_argument("Incorrect implementation");
         }
@@ -178,18 +178,18 @@ int main(){
     };
 
     bool ab = files_equal("./output/impl_A.txt", "./output/impl_B.txt");
-    // bool ac = files_equal("./output/impl_A.txt", "./output/impl_C.txt");
-    // bool bc = files_equal("./output/impl_B.txt", "./output/impl_C.txt");
+    bool ac = files_equal("./output/impl_A.txt", "./output/impl_C.txt");
+    bool bc = files_equal("./output/impl_B.txt", "./output/impl_C.txt");
 
     std::cout<<"\n========== VERIFICATION ==========\n";
     std::cout<<"A == B: "<<(ab ? "PASS" : "FAIL")<<'\n';
-    // std::cout<<"A == C: "<<(ac ? "PASS" : "FAIL")<<'\n';
-    // std::cout<<"B == C: "<<(bc ? "PASS" : "FAIL")<<'\n';
+    std::cout<<"A == C: "<<(ac ? "PASS" : "FAIL")<<'\n';
+    std::cout<<"B == C: "<<(bc ? "PASS" : "FAIL")<<'\n';
 
-    // if(ab && ac && bc){
-    //     std::cout<<"All implementations match!\n";
-    //     return 0;
-    // }
+    if(ab && ac && bc){
+        std::cout<<"All implementations match!\n";
+        return 0;
+    }
 
     std::cout<<"Mismatch detected. Compare the output files.\n";
     return 1;
