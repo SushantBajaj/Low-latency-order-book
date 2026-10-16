@@ -12,9 +12,7 @@ OrderbookOne::OrderbookOne(){
 void OrderbookOne::add_order(uint32_t id, Side side, uint16_t price, uint8_t qty){
     std::pmr::map<u16, u32>* arr[2] = {&bids, &asks};
     std::pmr::map<u16, u32>* curr = arr[(side!=Side::Buy)]; 
-    // std::map<u16, u32>* arr[2] = {&bids, &asks};
-    // std::map<u16, u32>* curr = arr[(side!=Side::Buy)]; 
-
+    
     auto it = curr->find(price);
     if(it==curr->end()){
         auto result = curr->insert({price,qty});
