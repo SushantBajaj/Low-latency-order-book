@@ -22,7 +22,7 @@ struct id_map_val{
 class OrderbookOne : public IOrderbook{
     private:
     
-    std::map<u16,u32, std::greater<u16>>bids;
+    std::map<u16,u32>bids;
     std::map<u16,u32>asks;
     std::unordered_map<u32, id_map_val>id_map;
     
