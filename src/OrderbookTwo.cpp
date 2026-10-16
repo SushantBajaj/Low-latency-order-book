@@ -5,13 +5,6 @@
 #include <vector>
 
 
-<<<<<<< Updated upstream
-void OrderbookTwo::add_order(uint32_t id, Side side, uint16_t price, uint8_t qty){};
-bool OrderbookTwo::cancel_order(uint32_t id){};
-BBO OrderbookTwo::get_bbo() const{};
-std::vector<Level> OrderbookTwo::get_bids(int depth) const{};
-std::vector<Level> OrderbookTwo::get_asks(int depth) const{};
-=======
 OrderbookTwo::OrderbookTwo(){
     arr = std::vector<uint16_t>(10001);
     id_map.reserve(1e6);
@@ -103,4 +96,3 @@ std::vector<Level> OrderbookTwo::get_asks(int depth) {
     }
     return temp;
 };
->>>>>>> Stashed changes
