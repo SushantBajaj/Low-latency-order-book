@@ -8,6 +8,7 @@
 OrderbookTwo::OrderbookTwo(){
     arr = std::vector<uint16_t>(10001);
     id_map.reserve(1e6);
+
 }
 
 void OrderbookTwo::add_order(uint32_t id, Side side, uint16_t price, uint8_t qty){

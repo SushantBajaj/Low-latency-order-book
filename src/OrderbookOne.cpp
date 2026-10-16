@@ -5,10 +5,14 @@
 #include <vector>
 
 
-void OrderbookOne::add_order(uint32_t id, Side side, uint16_t price, uint8_t qty){
-    std::map<u16,u32>* arr[2] = {&bids, &asks};
-    std::map<u16,u32>* curr = arr[(side!=Side::Buy)]; 
+OrderbookOne::OrderbookOne(){
+    id_map.reserve(1e6);
+}
 
+void OrderbookOne::add_order(uint32_t id, Side side, uint16_t price, uint8_t qty){
+    std::pmr::map<u16, u32>* arr[2] = {&bids, &asks};
+    std::pmr::map<u16, u32>* curr = arr[(side!=Side::Buy)]; 
+    
     auto it = curr->find(price);
     if(it==curr->end()){
         auto result = curr->insert({price,qty});
@@ -19,27 +23,6 @@ void OrderbookOne::add_order(uint32_t id, Side side, uint16_t price, uint8_t qty
     }
 
 
-    // if(side==Side::Buy){
-    //     auto it = bids.find(price);
-
-    //     if(it==bids.end()){
-    //         auto result = bids.insert({price,qty});
-    //         id_map.insert({id,{side,result.first,qty}});
-    //     }else{
-    //         it->second+=qty;
-    //         id_map.insert({id,{side,it,qty}});
-    //     }
-
-    // }else{
-    //     auto it = asks.find(price);
-    //     if(it==asks.end()){
-    //         auto result = asks.insert({price,qty});
-    //         id_map.insert({id,{side,result.first,qty}});
-    //     }else{
-    //         it->second+=qty;
-    //         id_map.insert({id,{side,it,qty}});
-    //     }
-    // }
 };
 
 bool OrderbookOne::cancel_order(uint32_t id){
@@ -65,7 +48,7 @@ bool OrderbookOne::cancel_order(uint32_t id){
     return false;
 };
 
-BBO OrderbookOne::get_bbo() const{
+BBO OrderbookOne::get_bbo(){
     bool has_ask = asks.size()!=0;
     bool has_bid = bids.size()!=0;
     auto bid_it = prev(bids.end());
@@ -84,19 +67,19 @@ BBO OrderbookOne::get_bbo() const{
     return temp;
 };
 
-std::vector<Level> OrderbookOne::get_bids(int depth) const{
+std::vector<Level> OrderbookOne::get_bids(int depth) {
     int count = std::min(bids.size(),static_cast<size_t>(depth));
     std::vector<Level> temp(count);
-    auto it = prev(bids.end());
+    auto it = bids.rbegin();
     for(int i =0;i<count;i++){
         temp[i] = {it->first, it->second};
-        it--;
+        it++;
     }
 
     return temp;
 };
 
-std::vector<Level> OrderbookOne::get_asks(int depth) const{
+std::vector<Level> OrderbookOne::get_asks(int depth) {
     int count = std::min(asks.size(),static_cast<size_t>(depth));
     std::vector<Level> temp(count);
     auto it = asks.begin();
