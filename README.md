@@ -54,3 +54,5 @@ using monotonic_buffer for the ds of implA really helped, times improved by a lo
 
 
 had to remove const from get_bbo/get_bids/get_asks, as we need to modify ds in impl2
+
+mono is helping aacha khasa in impl B too, makes sense actually, kisi bhi random access wale ds ki cache locality better krdeta hai with the cost of memory ofc
