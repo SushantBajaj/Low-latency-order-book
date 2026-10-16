@@ -43,3 +43,9 @@ first perf on it
            0.16177 +- 0.00106 seconds time elapsed  ( +-  0.65% )
 
 ```
+
+
+trying removing branching-
+earlier buy sell branch was predictable, so made that a bit more unpredicatable first
+then started adding some branchless code-
+4.66%->4.51% () - used map pointer to sleect map in add_order on impl1
