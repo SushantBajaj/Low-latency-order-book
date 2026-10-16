@@ -28,7 +28,8 @@ class OrderbookThree : public IOrderbook{
 
     std::pmr::monotonic_buffer_resource pool;
     std::pmr::unordered_map<u32, Umap_obj>id_map{&pool};
-
+    BBO curr_best_bbo;
+    bool valid_best;
     u8 last_set_bit(u64 qword);
     u8 first_set_bit(u64 qword);
 
