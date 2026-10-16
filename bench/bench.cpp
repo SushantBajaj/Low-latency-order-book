@@ -37,11 +37,12 @@ int main(int argc, char* argv[]){
     
 
     std::mt19937 rng(42); // to genearte pseudo random price and quantity
-    std::mt19937 side_rng(12345);
+
+    std::mt19937 side_rng(12345); // seperate rng used to generate pseudo random buy/sell
     std::bernoulli_distribution buy_dist(0.5);
 
     std::vector<double>add_order_times,cancel_order_times,get_bbo_times,get_bids_asks_times,total_durations;
-    int checksum {};
+    int checksum {}; // to ensure compiler doesnt optimize away stuff
 
     for(int times = 0;times<5;times++){
 
@@ -58,6 +59,7 @@ int main(int argc, char* argv[]){
 
         u32 operations = 1e6;
     
+        //making and pre populating buy/sell vector
         std::vector<Side> add_sides;
         add_sides.reserve(operations);
     
@@ -120,6 +122,7 @@ int main(int argc, char* argv[]){
                 cancel_order_count++;
     
                 u32 cancel_idx = random_val%order_ids.size();
+                //purposely let cancel_idx be index to an already cancelled order, to check that case
     
                 auto start = Clock::now();
     
@@ -129,26 +132,24 @@ int main(int argc, char* argv[]){
                 cancel_order_time+=end-start;
     
             }else{// 70% add operations
+
                 add_order_count++;
-                u16 buy_value = ((random_val % 5000) + 5000);
-                u16 sell_value = (random_val % 5000) + 10001;
-    
                 Side side = add_sides[side_idx++];
-    
-                u16 arr[2] = {buy_value,sell_value};
-    
-                u16 value = arr[(side==Side::Sell)];
-                
-    
+
+                u16 buy_value = ((random_val % 5000) + 5000); // range = [5000,9999]
+                u16 sell_value = (random_val % 5000) + 10001; // range = [10001,15000]
                 u8 quantity = ((random_val+operations) %100) +1; // range = [1,100]
-    
+                
+                //made this section branchless, as it is hard to predict Side
+                u16 arr[2] = {buy_value,sell_value};
+                u16 value = arr[(side==Side::Sell)];
     
                 auto start = Clock::now();
                 
                 book->add_order(current_id, side, value, quantity);
                 
                 auto end = Clock::now();
-                
+
                 add_order_time+=end-start;
                 
                 order_ids.push_back(current_id++); // add order id in vector to support cancellation
