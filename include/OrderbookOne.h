@@ -17,7 +17,7 @@ using u8 = std::uint8_t;
 
 struct id_map_val{
     Side side;
-    std::map<u16,u32>::iterator it;
+    std::pmr::map<u16, u32>::iterator it;
     u8 quantity;
 };
 
