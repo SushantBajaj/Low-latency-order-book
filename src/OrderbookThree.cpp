@@ -21,7 +21,7 @@ OrderbookThree::OrderbookThree(){
     bids = std::vector<u64>(arr_size,0);
     asks = std::vector<u64>(arr_size,0);
     quantities = std::vector<u32>(10001);
-
+    valid_best = false;
 }
 
 u8 OrderbookThree::last_set_bit(u64 qword){
@@ -119,6 +119,9 @@ u8 OrderbookThree::first_set_bit(u64 qword){
 
 void OrderbookThree::add_order(uint32_t id, Side side, uint16_t price, uint8_t qty){
     size_t bit_position;
+    if(side== Side::Sell && price<=curr_best_bbo.ask_price) valid_best = false;
+    if(side== Side::Buy && price>=curr_best_bbo.bid_price) valid_best = false;
+
     if(side==Side::Sell){
         bit_position = price-ask_offset;
     }else{
@@ -144,6 +147,8 @@ bool OrderbookThree::cancel_order(uint32_t id){
         Side side = it->second.side;
         u16 price = it->second.price;
         u8 qty = it->second.qty;
+        if(side== Side::Sell && price==curr_best_bbo.ask_price) valid_best = false;
+        if(side== Side::Buy && price==curr_best_bbo.bid_price) valid_best = false;
 
         size_t qty_idx = price-quantity_arr_offset;
         quantities[qty_idx]-=qty;
@@ -173,6 +178,7 @@ bool OrderbookThree::cancel_order(uint32_t id){
     return false;
 };
 BBO OrderbookThree::get_bbo(){
+    if(valid_best) return curr_best_bbo;
     BBO temp;
     bool has_bid = false;
     size_t bid_qword_idx;
@@ -215,7 +221,8 @@ BBO OrderbookThree::get_bbo(){
         temp.ask_price = 0;
         temp.ask_qty = 0;
     }
-
+    curr_best_bbo = temp;
+    valid_best = true;
     return temp;
 };
 std::vector<Level> OrderbookThree::get_bids(int depth) {
