@@ -4,13 +4,13 @@
 #include <cstdint>
 #include <vector>
 
-
+//mostly basic stl should be self explanatory
 OrderbookOne::OrderbookOne(){
-    id_map.reserve(1e6);
+    id_map.reserve(1e6); // max number of operations
 }
 
 void OrderbookOne::add_order(uint32_t id, Side side, uint16_t price, uint8_t qty){
-    std::pmr::map<u16, u32>* arr[2] = {&bids, &asks};
+    std::pmr::map<u16, u32>* arr[2] = {&bids, &asks}; // why pmr? explained in readme (hopefully)
     std::pmr::map<u16, u32>* curr = arr[(side!=Side::Buy)]; 
     
     auto it = curr->find(price);

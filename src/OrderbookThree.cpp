@@ -11,10 +11,10 @@ using u16 = std::uint16_t;
 using u8 = std::uint8_t;
 
 
-size_t arr_size = (5000/64) + 1;
-size_t bid_offset = (5000);
-size_t ask_offset = (10001);
-size_t quantity_arr_offset = 5000;
+size_t arr_size = (5000/64) + 1; // should be better explained in the docs
+size_t bid_offset = (5000); //min bid price
+size_t ask_offset = (10001); //max bid price
+size_t quantity_arr_offset = 5000; 
 
 
 OrderbookThree::OrderbookThree(){
@@ -22,9 +22,10 @@ OrderbookThree::OrderbookThree(){
     bids = std::vector<u64>(arr_size,0);
     asks = std::vector<u64>(arr_size,0);
     quantities = std::vector<u32>(10001);
-    valid_best = false;
+    valid_best = false; // to maintain BBO cache and invalidation
 }
 
+//this function is used for finding out the last set bit in a 64bit datatype
 u8 OrderbookThree::last_set_bit(u64 qword){
     u8 curr = {};
     u32 low_dword = static_cast<u32>(qword);
@@ -71,7 +72,7 @@ u8 OrderbookThree::last_set_bit(u64 qword){
 
 }
 
-
+//this function is used for finding out the first set bit in a 64bit datatype
 u8 OrderbookThree::first_set_bit(u64 qword){
     u8 curr = {};
     u32 low_dword = static_cast<u32>(qword);
@@ -119,12 +120,13 @@ u8 OrderbookThree::first_set_bit(u64 qword){
 
 
 void OrderbookThree::add_order(uint32_t id, Side side, uint16_t price, uint8_t qty){
+    //invalidating cached BBO if a better price or quantity gets added
     ((side== Side::Sell && price<=curr_best_bbo.ask_price) ||
      (side== Side::Buy && price>=curr_best_bbo.bid_price))
       ? void(valid_best = false):void();
     
 
-    
+    //to make code branchless, why branchless? should be explained in docs
     u16 branch_arr[2];
     branch_arr[0] = price-ask_offset;
     branch_arr[1] = price-bid_offset;
@@ -133,6 +135,7 @@ void OrderbookThree::add_order(uint32_t id, Side side, uint16_t price, uint8_t q
     size_t qword_idx = bit_position/64;
     bit_position %=64;
 
+    //again try at branhless
     u64* branch_arr2[2];
     branch_arr2[0] = &asks[qword_idx];
     branch_arr2[1] = &bids[qword_idx];
@@ -151,6 +154,8 @@ bool OrderbookThree::cancel_order(uint32_t id){
         Side side = it->second.side;
         u16 price = it->second.price;
         u8 qty = it->second.qty;
+
+        //invalidating bbo if current best gets cancelled
         if(side== Side::Sell && price==curr_best_bbo.ask_price) valid_best = false;
         if(side== Side::Buy && price==curr_best_bbo.bid_price) valid_best = false;
 
@@ -183,6 +188,7 @@ bool OrderbookThree::cancel_order(uint32_t id){
 };
 BBO OrderbookThree::get_bbo(){
     if(valid_best) return curr_best_bbo;
+    
     BBO temp;
     bool has_bid = false;
     size_t bid_qword_idx;

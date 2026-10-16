@@ -6,8 +6,8 @@
 
 
 OrderbookTwo::OrderbookTwo(){
-    arr = std::vector<uint16_t>(10001);
-    id_map.reserve(1e6);
+    arr = std::vector<uint16_t>(10001); // range on buy and sell prices
+    id_map.reserve(1e6); // max number of operations
 
 }
 
