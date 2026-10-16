@@ -18,6 +18,7 @@ size_t quantity_arr_offset = 5000;
 
 
 OrderbookThree::OrderbookThree(){
+    id_map.reserve(1e6);
     bids = std::vector<u64>(arr_size,0);
     asks = std::vector<u64>(arr_size,0);
     quantities = std::vector<u32>(10001);
@@ -118,23 +119,26 @@ u8 OrderbookThree::first_set_bit(u64 qword){
 
 
 void OrderbookThree::add_order(uint32_t id, Side side, uint16_t price, uint8_t qty){
-    size_t bit_position;
-    if(side== Side::Sell && price<=curr_best_bbo.ask_price) valid_best = false;
-    if(side== Side::Buy && price>=curr_best_bbo.bid_price) valid_best = false;
+    ((side== Side::Sell && price<=curr_best_bbo.ask_price) ||
+     (side== Side::Buy && price>=curr_best_bbo.bid_price))
+      ? void(valid_best = false):void();
+    
 
-    if(side==Side::Sell){
-        bit_position = price-ask_offset;
-    }else{
-        bit_position = price-bid_offset;
-    }
+    
+    u16 branch_arr[2];
+    branch_arr[0] = price-ask_offset;
+    branch_arr[1] = price-bid_offset;
+    size_t bit_position = branch_arr[side==Side::Buy];
+    
     size_t qword_idx = bit_position/64;
     bit_position %=64;
 
-    if(side==Side::Sell){
-        asks[qword_idx] |= (u64{1}<<(63-bit_position));
-    }else{
-        bids[qword_idx] |= (u64{1}<<(63-bit_position));
-    }
+    u64* branch_arr2[2];
+    branch_arr2[0] = &asks[qword_idx];
+    branch_arr2[1] = &bids[qword_idx];
+
+    *branch_arr2[side==Side::Buy] |= (u64{1}<<(63-bit_position));
+
 
     quantities[price-quantity_arr_offset]+=qty;
     id_map.insert({id,{price,qty,side}});
